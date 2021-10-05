@@ -1,0 +1,65 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+int N, R;
+
+bool opt(pair<int, int>& a, pair<int, int>& b) {
+    if (a.second == b.second) return a.first < b.first;
+    return a.second < b.second;
+}
+
+void topo(vector<vector<int> >& graph, vector<int>& rank, vector<pair<int, int> >& results){
+    vector<int> indegree(N, 0);
+    queue<pair<int, int> > zero_degree;
+    for (int i = 0; i < N; i++) {
+        for (int& v : graph[i]) indegree[v]++;
+    }
+    for (int i = 0; i < indegree.size(); i++) {
+        if (indegree[i] == 0) zero_degree.push(make_pair(i, 1));
+    }
+    while (!zero_degree.empty()) {
+        int u = zero_degree.front().first;
+        zero_degree.pop();
+        results.push_back(make_pair(u, rank[u]));
+        for (int& v : graph[u]) {
+            indegree[v]--;
+            rank[v] = rank[u] + 1;
+            if (indegree[v] == 0) zero_degree.push(make_pair(v, rank[v]));
+            
+        }
+    }
+}
+
+
+int main()
+{
+    int T, t, a, b;
+    cin >> T;
+    t = T;
+    while(T--) {
+        cin >> N >> R;
+        vector<vector<int> >  graph(N);
+        vector<int> rank(N, 1);
+        vector<pair<int, int> > results;
+        for (int i = 0; i < R; i++) {
+            cin >> a >> b;
+            graph[b].push_back(a);
+        }
+        topo(graph, rank, results);
+        cout << "Scenario #" << (t - T) << ": \n";
+        sort(results.begin(), results.end(), opt);
+        for (int i = 0; i < results.size(); i++) {
+            cout << results[i].second << " " << results[i].first << endl;
+        }
+        for (int i = 0; i < N; i++) {
+            graph[i].clear();
+        }
+        results.clear();
+        rank.clear();
+    }
+   return 0;
+}
