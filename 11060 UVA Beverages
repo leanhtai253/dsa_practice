@@ -1,0 +1,83 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <map>
+
+using namespace std;
+int N, T;
+
+
+
+bool topo(vector<vector<int> >& graph, vector<int>& results) {
+    vector<int> indegree(N, 0);
+    priority_queue<int, vector<int>, greater<int> > zero_degree;
+    for (auto i = 0; i < N; i++) {
+        for (int& j : graph[i]) indegree[j]++;
+    }
+    for (int i = 0; i < indegree.size(); i++) {
+        if (indegree[i] == 0) zero_degree.push(i);
+    }
+    while(!zero_degree.empty()) {
+        int u = zero_degree.top();
+        zero_degree.pop();
+        results.push_back(u);
+        
+        for (int& edge : graph[u]) {
+            indegree[edge]--;
+            if (indegree[edge] == 0) zero_degree.push(edge);
+        }
+    }
+    for (int i = 0; i < indegree.size(); i++) {
+        if (indegree[i] != 0) return false;
+    }
+    return true;
+}
+
+
+
+
+int main()
+{
+    int id = 1;
+    while(cin >> N) {
+        vector<vector<int> > graph(N, vector<int>());
+        vector<int> results;
+        map<string, int> drinks;
+        string a, b;
+        for (int i = 0; i < N; i++) {
+            cin >> a;
+            drinks[a] = i;
+        }
+        cin >> T;
+        for (auto i = 0; i < T; i++) {
+            cin >> a >> b;
+            graph[drinks[a]].push_back(drinks[b]);
+        }
+        cout << "Case #" << id++ << ": Dilbert should drink beverages in this order: ";
+        //for (int i = 0; i < N; i++) cout << results[i] << " ";
+        if(topo(graph, results)){
+            map<string, int>::iterator it;
+            for (int i = 0; i < results.size(); i++) {
+                for (it = drinks.begin(); it != drinks.end(); it++) {
+                    if ((*it).second == results[i]) {
+                        cout << (*it).first;
+                        if (i != results.size() - 1) cout << " ";
+                    }
+                }
+            }
+            cout << ".\n";
+            cout << endl;
+        }
+        
+        /*
+        for (int i = 0; i < N; i++) {
+            cout << i << ": ";
+            for (int j = 0; j < graph[i].size(); j++) cout << graph[i][j] << " ";
+            cout << endl;
+        }
+        */
+        for (int i = 0; i < N; i++) graph[i].clear();
+        results.clear();
+    }
+   return 0;
+}
